@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Mini játékok</title>
+<style>
+:root{
+  --bg:#f3f6fb;
+  --panel:#ffffff;
+  --panel-2:#f8fafc;
+  --text:#0f172a;
+  --muted:#64748b;
+  --line:#dbe3ef;
+  --blue:#2563eb;
+  --red:#dc2626;
+  --green:#16a34a;
+  --amber:#d97706;
+  --shadow:0 20px 50px rgba(15,23,42,.08);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:linear-gradient(180deg,#eef3fa 0%,#f8fafd 100%);color:var(--text);font:16px/1.45 Inter,Arial,Helvetica,sans-serif;min-height:100%}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible{outline:3px solid rgba(37,99,235,.45);outline-offset:3px}
+.hidden{display:none!important}
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{background:#0f172a;color:#e5eefc;padding:22px 18px 18px;display:flex;flex-direction:column;gap:16px}
+.brand{padding:10px 12px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.brand .eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#93c5fd;font-weight:800}
+.brand h1{margin:8px 0 6px;font-size:30px;line-height:1.02;letter-spacing:-1.6px}
+.brand p{margin:0;color:#cbd5e1;font-size:13px}
+.side-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+.side-card h3{margin:0 0 10px;font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:#93c5fd}
+.kbdrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08)}
+.kbdrow:first-of-type{border-top:0;padding-top:0}
+.kbd{display:inline-flex;min-width:34px;height:34px;align-items:center;justify-content:center;padding:0 10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-weight:800}
+.player1{color:#93c5fd}.player2{color:#fca5a5}
+.side-list{display:grid;gap:8px}
+.side-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04)}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 8px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px;font-weight:800}
+.content{padding:22px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}
+.topbar h2{margin:0;font-size:28px;letter-spacing:-1px}
+.topbar p{margin:4px 0 0;color:var(--muted)}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:11px 15px;border-radius:12px;font-weight:700;box-shadow:0 1px 0 rgba(15,23,42,.02)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.ghost{background:transparent}
+.grid{display:grid;gap:18px}
+.home-grid{grid-template-columns:1.35fr .95fr}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel.pad{padding:20px}
+.hero{padding:24px}
+.hero h3{margin:0 0 8px;font-size:14px;color:var(--blue);letter-spacing:1px;text-transform:uppercase}
+.hero h1{margin:0 0 12px;font-size:54px;line-height:.95;letter-spacing:-2.5px}
+.hero p{margin:0;color:var(--muted);max-width:60ch}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.stat{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat .label{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stat .value{margin-top:8px;font-size:28px;font-weight:800;letter-spacing:-1px}
+.game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.game-card{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.game-card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.game-card .num{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.game-card h4{margin:4px 0 0;font-size:24px;letter-spacing:-.7px}
+.game-card p{margin:0;color:var(--muted);font-size:14px}
+.game-card .meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+.mini-chip{padding:7px 10px;border-radius:999px;background:#eef4ff;color:var(--blue);font-weight:800;font-size:12px}
+.scorebox{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.score-tile{padding:18px;border-radius:16px;background:var(--panel-2);border:1px solid var(--line)}
+.score-tile .who{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.score-tile .big{font-size:58px;line-height:1;font-weight:900;letter-spacing:-2px;margin-top:8px}
+.score-tile.p1 .big{color:var(--blue)}
+.score-tile.p2 .big{color:var(--red)}
+.log{display:grid;gap:10px;margin-top:16px}
+.log-item{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);font-size:14px}
+.log-item small{color:var(--muted)}
+.arena{padding:20px}
+.headerline{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap}
+.headerline h3{margin:0;font-size:34px;letter-spacing:-1.3px}
+.headerline p{margin:6px 0 0;color:var(--muted)}
+.kpis{display:flex;gap:10px;flex-wrap:wrap}
+.kpi{padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;font-size:13px;font-weight:700;color:var(--muted)}
+.center-box{min-height:300px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#f8fbff);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px}
+.eyebig{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.big-word{margin:8px 0 10px;font-size:clamp(60px,10vw,120px);font-weight:900;letter-spacing:-4px;line-height:.92}
+.subtext{color:var(--muted);max-width:58ch}
+.footerline{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.scoreline{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pill{padding:8px 12px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);font-weight:700;font-size:14px}
+.progress-wrap{display:grid;gap:18px}
+.barbox{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:14px}
+.barhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:800}
+.track{height:28px;background:#e7eef8;border-radius:999px;overflow:hidden;position:relative}
+.fill{height:100%;width:0%;background:var(--blue);transition:width .07s linear}
+.fill.red{background:var(--red)}
+.tic-wrap{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
+.tic-board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tic{aspect-ratio:1/1;border:1px solid var(--line);border-radius:16px;background:var(--panel);font-size:clamp(36px,6vw,74px);font-weight:900;color:var(--text)}
+.tic:hover:not(:disabled){background:#f8fbff}
+.tic small{font-size:16px;color:var(--muted);font-weight:700}
+.sidepanel{padding:16px;border-radius:16px;background:var(--panel-2);border:1px solid var(--line)}
+.sidepanel h4{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.result-screen{padding:28px;text-align:center}
+.result-screen h1{font-size:clamp(54px,10vw,96px);line-height:.95;letter-spacing:-3px;margin:10px 0}
+.result-screen p{color:var(--muted);max-width:54ch;margin:0 auto 20px}
+.result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}
+.result-card{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+.result-card .score{font-size:48px;font-weight:900;line-height:1;letter-spacing:-1px;margin-top:8px}
+.small-note{font-size:12px;color:var(--muted)}
+.mobile-hide{display:block}
+@media (max-width: 980px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .home-grid,.tic-wrap{grid-template-columns:1fr}
+}
+@media (max-width: 720px){
+  .content{padding:14px}
+  .hero h1{font-size:42px}
+  .game-grid,.stat-grid,.scorebox,.result-grid{grid-template-columns:1fr}
+}
+
+/* Presentation-style launcher: games are the entire interface on the start page. */
+body.showcase-mode{background:#f3f4f6}
+body.showcase-mode .app{display:block;min-height:100vh}
+body.showcase-mode .sidebar{display:none}
+body.showcase-mode .content{max-width:1660px;margin:0 auto;padding:0 clamp(22px,4.2vw,76px) 38px}
+.showcase{min-height:100vh;display:flex;flex-direction:column}
+.show-head{display:flex;justify-content:space-between;align-items:center;padding:32px 0 26px;border-bottom:1px solid #d9dce2;gap:24px}
+.show-mark{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:850;letter-spacing:-.3px}
+.show-symbol{display:grid;grid-template-columns:repeat(2,9px);grid-template-rows:repeat(2,9px);gap:3px;transform:rotate(-10deg)}
+.show-symbol span{display:block;background:#202b40;border-radius:2px}
+.show-symbol span:last-child{background:#b9c6dc}
+.show-head .show-tag{display:flex;gap:10px;align-items:center;color:#596273;font-size:12px;font-weight:700;letter-spacing:.2px}
+.show-dot{height:7px;width:7px;border-radius:50%;background:#259764;display:inline-block}
+.show-lead{padding:55px 0 33px;display:flex;align-items:end;justify-content:space-between;gap:30px}
+.show-lead small{font-weight:750;font-size:12px;color:#53637d;letter-spacing:1.25px;text-transform:uppercase}
+.show-lead h1{font-size:clamp(46px,6vw,86px);font-weight:870;line-height:1;letter-spacing:-4.2px;margin:13px 0 0}
+.show-lead p{margin:0 0 3px;color:#5e6674;font-size:16px;max-width:270px;line-height:1.5}
+.show-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+.show-tile{border:1px solid #d6dbe4;border-radius:20px;background:#fff;text-align:left;color:#111b2e;padding:0;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:420px;box-shadow:0 3px 7px rgba(22,34,53,.025);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.show-tile:hover,.show-tile:focus-visible{transform:translateY(-4px);border-color:#a0acc0;box-shadow:0 20px 38px rgba(24,43,65,.10)}
+.show-art{height:260px;min-height:260px;padding:28px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.show-art .show-number{position:absolute;top:20px;left:23px;font-size:12px;letter-spacing:1px;font-weight:800;opacity:.6}
+.show-art-reaction{background:#e6ece8}
+.show-traffic{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.show-traffic .show-pill{font-weight:900;letter-spacing:4px;font-size:12px;color:#397452}
+.show-start{font-size:clamp(60px,6.8vw,108px);font-weight:950;letter-spacing:-5px;color:#1f6542;line-height:1}
+.show-traffic .show-start-line{height:9px;width:132px;max-width:60%;border-radius:20px;background:#a3ceb5}
+.show-art-sprint{background:#e7eaf5}
+.show-meter{width:100%;max-width:340px;display:grid;gap:23px}
+.show-meter .show-meter-label{display:flex;justify-content:space-between;font-size:12px;font-weight:900;color:#55617d;margin-bottom:9px}
+.show-meter-track{height:27px;border-radius:8px;overflow:hidden;background:#d0d8ea}
+.show-meter-fill{height:100%;border-radius:8px;background:#4767b8;width:78%}
+.show-meter-fill.red{background:#bc6470;width:57%}
+.show-art-tic{background:#eee9e5}
+.show-mini-board{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;width:189px;height:189px;transform:rotate(-4deg)}
+.show-mini-cell{background:#fff;border:1px solid #d1c5bd;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:38px;line-height:1;font-weight:800;color:#36455f}
+.show-mini-cell.o{color:#bb756b}
+.show-tile-copy{padding:23px 25px 24px;flex:1;display:flex;flex-direction:column}
+.show-tile-name{font-size:clamp(26px,2.3vw,37px);font-weight:850;letter-spacing:-1.25px;line-height:1.1;margin-bottom:10px}
+.show-tile-desc{font-size:14px;color:#657080;line-height:1.45;max-width:29ch}
+.show-tile-bottom{margin-top:auto;padding-top:22px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.show-tile-bottom .show-control{font-size:12px;font-weight:750;color:#566273}
+.show-arrow{height:40px;width:40px;border-radius:50%;background:#111c2e;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:600;transition:transform .18s ease}
+.show-tile:hover .show-arrow{transform:translateX(3px)}
+.show-footer{padding:30px 0 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.show-foot-note{display:flex;align-items:center;gap:10px;color:#677384;font-size:13px}
+.show-key{display:inline-flex;padding:4px 8px;border:1px solid #cbd2dd;border-radius:7px;color:#334155;font-size:13px;font-weight:800;background:#fff}
+.show-champ-btn{border:1px solid #c6cdd9;background:transparent;color:#1c293e;padding:12px 17px;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer}
+.show-champ-btn:hover{background:#fff;border-color:#8e9aac}
+@media (min-width: 1200px){.showcase{justify-content:flex-start}}
+@media (max-width: 950px){.show-grid{grid-template-columns:1fr 1fr}.show-tile:last-child{grid-column:1 / -1}.show-lead{padding-top:30px}.show-art{height:220px;min-height:220px}}
+@media (max-width: 670px){.show-grid{grid-template-columns:1fr}.show-tile:last-child{grid-column:auto}.show-tile{min-height:340px}.show-art{height:205px;min-height:205px}.show-lead{display:block}.show-lead h1{letter-spacing:-2.6px}.show-lead p{margin:15px 0 0}.show-head{padding:22px 0}.show-head .show-tag{font-size:11px}.show-footer{padding:22px 0}}
+@media (prefers-reduced-motion:reduce){.show-tile,.show-arrow{transition:none}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="eyebrow"></div>
+      <h1>Mini játékok</h1>
+      <p>Egyszerű, gyors, kétjátékos böngészős gyűjtemény.</p>
+    </div>
+    <div class="side-card">
+      <h3>Irányítás</h3>
+      <div class="kbdrow"><span class="player1">1. játékos</span><span class="kbd">A</span></div>
+      <div class="kbdrow"><span class="player2">2. játékos</span><span class="kbd">L</span></div>
+      <div class="kbdrow"><span>Tovább</span><span class="kbd">Enter</span></div>
+      <div class="kbdrow"><span>Vissza</span><span class="kbd">Esc</span></div>
+    </div>
+    <div class="side-card">
+      <h3>Játéklista</h3>
+      <div class="side-list">
+        <div class="side-item"><span class="badge">1</span><span>Reakció</span></div>
+        <div class="side-item"><span class="badge">2</span><span>Gombverseny</span></div>
+        <div class="side-item"><span class="badge">3</span><span>Amőba</span></div>
+      </div>
+    </div>
+    <div class="side-card">
+      <h3>Tipp</h3>
+      <p style="margin:0;color:#cbd5e1;font-size:13px">A teljes bajnokság gyors bemutatóra jó. Az egyes játékok külön is indíthatók.</p>
+    </div>
+  </aside>
+  <main class="content">
+    <div id="app"></div>
+  </main>
+</div>
+<script>
+const GAMES = [
+  { id:'reaction', title:'Reakció', rule:'Nyomj gyorsan, amikor megjelenik a RAJT!' },
+  { id:'sprint', title:'Gombverseny', rule:'Aki előbb eléri a 25 gombnyomást, az nyer.' },
+  { id:'tictac', title:'Amőba', rule:'Klasszikus 3×3-as amőba, 3 körben.' }
+];
+
+const app = document.getElementById('app');
+let view = 'home';
+let selected = null;
+let match = null;
+let champ = null;
+let timers = [];
+let raf = null;
+
+function clearTimers(){ timers.forEach(clearTimeout); timers=[]; if(raf) cancelAnimationFrame(raf); raf=null; }
+function later(fn,ms){ const id=setTimeout(fn,ms); timers.push(id); return id; }
+function now(){ return performance.now(); }
+function beep(freq=520,duration=0.08, type='sine', gain=.025){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    if(!beep.ctx) beep.ctx = new AC();
+    const ctx = beep.ctx;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.value = gain;
+    o.connect(g); g.connect(ctx.destination);
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(gain,t);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+    o.start(t); o.stop(t+duration);
+  }catch(e){}
+}
+function clamp(v,a,b){ return Math.min(b, Math.max(a,v)); }
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function champState(){
+  return champ || { active:false, index:0, points:[0,0], log:[] };
+}
+function resetToHome(){ clearTimers(); view='home'; selected=null; match=null; champ=null; render(); }
+
+function homeView(){
+  return `
+  <div class="showcase">
+    <header class="show-head">
+      <div class="show-mark"><span class="show-symbol" aria-hidden="true"><span></span><span></span><span></span><span></span></span> MINI JÁTÉKOK</div>
+      <div class="show-tag"><span class="show-dot"></span> <span style="color:#a1aabb">/</span> 2 JÁTÉKOS</div>
+    </header>
+    <div class="show-lead">
+      <div>
+        <small>Játékválasztó / 01-03</small>
+        <h1>Válassz egy játékot.</h1>
+      </div>
+      <p>Kattints bármelyik kártyára, és már indulhat is a játék.</p>
+    </div>
+    <section class="show-grid" aria-label="Választható játékok">
+      <button type="button" class="show-tile" data-play="reaction" aria-label="Reakció indítása">
+        <div class="show-art show-art-reaction" aria-hidden="true">
+          <span class="show-number">01 / REAKCIÓ</span>
+          <div class="show-traffic"><span class="show-pill">FELKÉSZÜLNI...</span><span class="show-start">RAJT!</span><span class="show-start-line"></span></div>
+        </div>
+        <div class="show-tile-copy">
+          <div class="show-tile-name">Reakció</div>
+          <div class="show-tile-desc">Ki nyomja meg előbb a gombot, amikor megjelenik a RAJT?</div>
+          <div class="show-tile-bottom"><span class="show-control">A és L gomb</span><span class="show-arrow" aria-hidden="true">→</span></div>
+        </div>
+      </button>
+      <button type="button" class="show-tile" data-play="sprint" aria-label="Gombverseny indítása">
+        <div class="show-art show-art-sprint" aria-hidden="true">
+          <span class="show-number">02 / GOMBVERSENY</span>
+          <div class="show-meter">
+            <div><div class="show-meter-label"><span>1. JÁTÉKOS</span><span>19 / 25</span></div><div class="show-meter-track"><div class="show-meter-fill"></div></div></div>
+            <div><div class="show-meter-label"><span>2. JÁTÉKOS</span><span>14 / 25</span></div><div class="show-meter-track"><div class="show-meter-fill red"></div></div></div>
+          </div>
+        </div>
+        <div class="show-tile-copy">
+          <div class="show-tile-name">Gombverseny</div>
+          <div class="show-tile-desc">Nyomd a gombodat minél gyorsabban. Az első 25 nyomás nyer.</div>
+          <div class="show-tile-bottom"><span class="show-control">A és L gomb</span><span class="show-arrow" aria-hidden="true">→</span></div>
+        </div>
+      </button>
+      <button type="button" class="show-tile" data-play="tictac" aria-label="Amőba indítása">
+        <div class="show-art show-art-tic" aria-hidden="true">
+          <span class="show-number">03 / AMŐBA</span>
+          <div class="show-mini-board">
+            <span class="show-mini-cell">X</span><span class="show-mini-cell o">O</span><span class="show-mini-cell">X</span>
+            <span class="show-mini-cell"></span><span class="show-mini-cell">X</span><span class="show-mini-cell o">O</span>
+            <span class="show-mini-cell o">O</span><span class="show-mini-cell"></span><span class="show-mini-cell">X</span>
+          </div>
+        </div>
+        <div class="show-tile-copy">
+          <div class="show-tile-name">Amőba</div>
+          <div class="show-tile-desc">A klasszikus X és O játék. Rakj ki hármat egy sorba.</div>
+          <div class="show-tile-bottom"><span class="show-control">Egér vagy 1–9</span><span class="show-arrow" aria-hidden="true">→</span></div>
+        </div>
+      </button>
+    </section>
+    <footer class="show-footer">
+      <div class="show-foot-note"><span class="show-key">A</span> 1. játékos <span style="padding:0 4px;color:#a8b3c2">·</span> <span class="show-key">L</span> 2. játékos</div>
+      <button type="button" class="show-champ-btn" data-action="champ">Mindhárom játék egymás után ↗</button>
+    </footer>
+  </div>`;
+}
+
+function topChrome(title, rule){
+  const c = champState();
+  return `
+  <div class="topbar">
+    <div>
+      <h2>${title}</h2>
+      <p>${rule}</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost" data-action="home">Főmenü</button>
+    </div>
+  </div>
+  ${c.active ? `<div class="panel pad" style="margin-bottom:18px"><div class="scorebox"><div class="score-tile p1"><div class="who">Bajnoki pont · 1. játékos</div><div class="big" style="font-size:42px">${c.points[0]}</div></div><div class="score-tile p2"><div class="who">Bajnoki pont · 2. játékos</div><div class="big" style="font-size:42px">${c.points[1]}</div></div></div></div>` : ''}`;
+}
+
+function footerControls(text, extra=''){
+  return `<div class="footerline"><div class="scoreline"><span class="pill">${text}</span>${extra?`<span class="pill">${extra}</span>`:''}</div><div class="small-note">Enter = tovább · Esc = főmenü</div></div>`;
+}
+
+function render(){
+  clearTimers();
+  document.body.classList.toggle('showcase-mode', view==='home');
+  if(view==='home'){ app.innerHTML = homeView(); attachHome(); return; }
+  if(view==='game'){ renderGame(); return; }
+  if(view==='result'){ renderResult(); return; }
+}
+
+function attachHome(){
+  app.querySelector('[data-action="champ"]').onclick = ()=>startChampionship();
+  app.querySelectorAll('[data-play]').forEach(btn=>btn.onclick=()=>startSingle(btn.dataset.play));
+}
+
+function startChampionship(){ champ={active:true,index:0,points:[0,0],log:[]}; startSingle(GAMES[0].id,true); }
+function startSingle(id,fromChamp=false){
+  selected = GAMES.find(g=>g.id===id);
+  match = { id:selected.id, title:selected.title, fromChamp, finished:false, winner:null, summary:'', data:{} };
+  view='game'; render();
+}
+function gameDone(winner, summary){
+  if(match.finished) return;
+  match.finished = true; match.winner = winner; match.summary = summary;
+  if(champ && champ.active){
+    if(winner===1 || winner===2) champ.points[winner-1]++;
+    champ.log.push({ game:selected.title, result:winner===0?`Döntetlen · ${summary}`:`${winner}. játékos · ${summary}` });
+  }
+  view='result'; render();
+}
+function nextAfterResult(){
+  if(champ && champ.active){
+    champ.index++;
+    if(champ.index < GAMES.length){ startSingle(GAMES[champ.index].id,true); return; }
+    showChampFinal(); return;
+  }
+  resetToHome();
+}
+function showChampFinal(){
+  const p1 = champ.points[0], p2 = champ.points[1];
+  view='result';
+  match = { finalChamp:true, winner:p1===p2?0:(p1>p2?1:2), summary:`Bajnoki pontok: ${p1} : ${p2}` };
+  renderResult();
+}
+
+function renderGame(){
+  if(selected.id==='reaction') renderReaction();
+  else if(selected.id==='sprint') renderSprint();
+  else if(selected.id==='tictac') renderTic();
+}
+
+// REACTION
+function renderReaction(){
+  const d = match.data;
+  if(!d.inited){ Object.assign(d,{round:0,score:[0,0],phase:'prep',message:'Készülj...',startedAt:0,inited:true}); nextReactionRound(); }
+  app.innerHTML = `${topChrome('Reakció', selected.rule)}
+    <section class="panel arena">
+      <div class="headerline"><div><h3>Reakciópárbaj</h3><p>Ne nyomj túl korán.</p></div><div class="kpis"><div class="kpi">Kör: ${d.round} / 5</div><div class="kpi">Állás: ${d.score[0]} : ${d.score[1]}</div></div></div>
+      <div class="center-box"><div class="eyebig">${d.phase==='wait'?'Várakozás':d.phase==='go'?'Most!':'Következő kör'}</div><div class="big-word" style="color:${d.phase==='go'?'var(--green)':d.phase==='wait'?'var(--text)':'var(--blue)'}">${escapeHtml(d.message)}</div><p class="subtext">${d.phase==='wait'?'Csak akkor nyomj, amikor megjelenik a RAJT!': d.phase==='go' ? 'Most nyomd meg a gombodat!' : 'Az eredmény röviden megjelenik, aztán jön a következő kör.'}</p></div>
+      ${footerControls('A · 1. játékos | L · 2. játékos')}
+    </section>`;
+}
+function nextReactionRound(){
+  const d = match.data; d.round++; d.phase='wait'; d.message='VÁRJ'; beep(280,.05,'square'); renderReaction();
+  later(()=>{ if(view!=='game'||selected.id!=='reaction'||match.finished) return; d.phase='go'; d.message='RAJT!'; d.startedAt=now(); beep(720,.07,'triangle'); renderReaction(); later(()=>{ if(d.phase==='go') reactionResolve(0,'Senki nem reagált időben.'); },2200); }, 1200 + rand(700,2200));
+}
+function reactionResolve(winner,text){
+  const d = match.data; if(d.phase!=='wait' && d.phase!=='go') return; d.phase='done'; d.message = text; if(winner) d.score[winner-1]++; beep(winner?500:220,.08,winner?'sine':'square'); renderReaction();
+  later(()=>{ if(d.round>=5){ gameDone(d.score[0]===d.score[1]?0:(d.score[0]>d.score[1]?1:2), `${d.score[0]} : ${d.score[1]}`); } else nextReactionRound(); }, 950);
+}
+function reactionKey(player){
+  const d = match.data;
+  if(d.phase==='wait') reactionResolve(player===1?2:1, `${player}. játékos túl korán nyomott.`);
+  else if(d.phase==='go') reactionResolve(player, `${player}. játékos volt a gyorsabb.`);
+}
+
+// SPRINT
+function renderSprint(){
+  const d = match.data;
+  if(!d.inited){ Object.assign(d,{counts:[0,0],target:25,inited:true}); later(()=>{ if(view==='game'&&selected.id==='sprint'&&!match.finished) sprintEnd(); },12000); }
+  app.innerHTML = `${topChrome('Gombverseny', selected.rule)}
+    <section class="panel arena">
+      <div class="headerline"><div><h3>Gombverseny</h3><p>Nyomd olyan gyorsan, ahogy csak tudod.</p></div><div class="kpis"><div class="kpi">Cél: 25</div><div class="kpi">Időlimit: 12 mp</div></div></div>
+      <div class="progress-wrap">
+        <div class="barbox"><div class="barhead"><span class="player1">1. játékos · A</span><span>${d.counts[0]} / 25</span></div><div class="track"><div class="fill" style="width:${clamp((d.counts[0]/25)*100,0,100)}%"></div></div></div>
+        <div class="barbox"><div class="barhead"><span class="player2">2. játékos · L</span><span>${d.counts[1]} / 25</span></div><div class="track"><div class="fill red" style="width:${clamp((d.counts[1]/25)*100,0,100)}%"></div></div></div>
+      </div>
+      ${footerControls('A és L · Minél gyorsabban nyomd')}
+    </section>`;
+}
+function sprintKey(player){ const d=match.data; d.counts[player-1]++; beep(player===1?420:360,.03,'square'); renderSprint(); if(d.counts[player-1]>=25) gameDone(player, `${d.counts[0]} : ${d.counts[1]}`); }
+function sprintEnd(){ const d=match.data; const winner=d.counts[0]===d.counts[1]?0:(d.counts[0]>d.counts[1]?1:2); gameDone(winner, `${d.counts[0]} : ${d.counts[1]}`); }
+
+// TIC TAC TOE
+const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function renderTic(){
+  const d = match.data;
+  if(!d.inited){ Object.assign(d,{round:1,score:[0,0],board:Array(9).fill(0),turn:1,phase:'play',message:'',inited:true}); }
+  app.innerHTML = `${topChrome('Amőba', selected.rule)}
+    <section class="panel arena">
+      <div class="headerline"><div><h3>Amőba</h3><p>3 körös párbaj.</p></div><div class="kpis"><div class="kpi">Kör: ${d.round} / 3</div><div class="kpi">Állás: ${d.score[0]} : ${d.score[1]}</div><div class="kpi">Következik: ${d.turn}. játékos</div></div></div>
+      <div class="tic-wrap">
+        <div class="tic-board">${d.board.map((v,i)=>`<button class="tic" data-cell="${i}" ${v||d.phase!=='play'?'disabled':''}>${v===1?'X':v===2?'O':`<small>${i+1}</small>`}</button>`).join('')}</div>
+        <div class="sidepanel"><h4>Irányítás</h4><p style="margin:0 0 10px;color:var(--muted)">Kattintással vagy a <strong>1–9</strong> gombokkal választhatsz mezőt.</p><div class="small-note">X = 1. játékos · O = 2. játékos</div><hr style="border:none;border-top:1px solid var(--line);margin:14px 0"><div class="small-note">${d.phase==='play' ? 'Most játszotok.' : escapeHtml(d.message)}</div></div>
+      </div>
+      ${footerControls('1–9 vagy kattintás')}
+    </section>`;
+  app.querySelectorAll('[data-cell]').forEach(btn=>btn.onclick=()=>ticMove(Number(btn.dataset.cell)));
+}
+function ticMove(i){
+  const d=match.data; if(d.phase!=='play' || d.board[i]) return; d.board[i]=d.turn; beep(d.turn===1?430:360,.04);
+  const won = lines.some(line => line.every(idx => d.board[idx]===d.turn));
+  if(won || d.board.every(Boolean)){
+    const winner = won ? d.turn : 0; if(winner) d.score[winner-1]++;
+    d.phase='pause'; d.message = winner ? `${winner}. játékos nyerte a kört.` : 'Döntetlen kör.'; renderTic();
+    later(()=>{
+      if(d.round>=3){ gameDone(d.score[0]===d.score[1]?0:(d.score[0]>d.score[1]?1:2), `${d.score[0]} : ${d.score[1]}`); }
+      else { d.round++; d.board=Array(9).fill(0); d.turn = d.round % 2 === 1 ? 1 : 2; d.phase='play'; d.message=''; renderTic(); }
+    },1000);
+  } else { d.turn = d.turn===1?2:1; renderTic(); }
+}
+
+function renderResult(){
+  if(match && match.finalChamp){
+    const p1=champ.points[0], p2=champ.points[1];
+    app.innerHTML = `
+      <div class="topbar"><div><h2>Bajnokság vége</h2><p>Az összes játék lefutott.</p></div><div class="top-actions"><button class="btn" data-action="home">Főmenü</button></div></div>
+      <section class="panel result-screen">
+        <div class="eyebig">Összesített eredmény</div>
+        <h1>${match.winner===0?'Döntetlen':`${match.winner}. játékos nyert`}</h1>
+        <p>${match.summary}</p>
+        <div class="result-grid"><div class="result-card"><div class="small-note">1. játékos</div><div class="score" style="color:var(--blue)">${p1}</div></div><div class="result-card"><div class="small-note">2. játékos</div><div class="score" style="color:var(--red)">${p2}</div></div></div>
+        <div class="top-actions" style="justify-content:center"><button class="btn primary" data-action="newchamp">Új bajnokság</button><button class="btn" data-action="home">Főmenü</button></div>
+      </section>`;
+    app.querySelectorAll('[data-action="home"]').forEach(b=>b.onclick=resetToHome);
+    app.querySelector('[data-action="newchamp"]').onclick = ()=>startChampionship();
+    return;
+  }
+  app.innerHTML = `
+    <div class="topbar"><div><h2>${selected.title} kész</h2><p>Az eredmény megérkezett.</p></div><div class="top-actions"><button class="btn" data-action="home">Főmenü</button></div></div>
+    <section class="panel result-screen">
+      <div class="eyebig">Minijáték vége</div>
+      <h1>${match.winner===0?'Döntetlen':`${match.winner}. játékos nyert`}</h1>
+      <p>${escapeHtml(match.summary)}</p>
+      <div class="top-actions" style="justify-content:center"><button class="btn primary" data-action="next">${champ && champ.active ? 'Következő játék' : 'Vissza a főmenübe'}</button>${champ && champ.active ? '' : '<button class="btn" data-action="retry">Újrajátszás</button>'}</div>
+    </section>`;
+  app.querySelectorAll('[data-action="home"]').forEach(b=>b.onclick=resetToHome);
+  app.querySelector('[data-action="next"]').onclick = ()=>nextAfterResult();
+  const retry = app.querySelector('[data-action="retry"]');
+  if(retry) retry.onclick = ()=>startSingle(selected.id);
+}
+
+function globalKey(e){
+  const key = e.key.toLowerCase();
+  if(key==='escape'){ resetToHome(); return; }
+  if(view==='result' && key==='enter'){ nextAfterResult(); return; }
+  if(view!=='game' || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+  if(selected.id==='reaction'){
+    if(key==='a' || key==='l'){ e.preventDefault(); reactionKey(key==='a'?1:2); }
+    return;
+  }
+  if(selected.id==='sprint'){
+    if(key==='a' || key==='l'){ e.preventDefault(); sprintKey(key==='a'?1:2); }
+    return;
+  }
+  if(selected.id==='tictac'){
+    if(/^[1-9]$/.test(key)){ e.preventDefault(); ticMove(Number(key)-1); }
+    return;
+  }
+}
+
+document.addEventListener('click', (e)=>{
+  const home = e.target.closest('button[data-action="home"]');
+  if(home && view==='game') resetToHome();
+});
+window.addEventListener('keydown', globalKey);
+render();
+</script>
+</body>
+</html>
